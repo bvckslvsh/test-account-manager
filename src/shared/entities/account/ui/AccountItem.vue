@@ -5,7 +5,7 @@
       :model-value="labelsInput"
       @update:modelValue="labelsInput = $event"
       @blur="onLabelsBlur"
-      :error="!validLabels"
+      :error="touched.labels && !validLabels"
       maxlength="50"
     />
 
@@ -17,7 +17,7 @@
         (v) => {
           local.type = v;
           if (v === 'LDAP') local.password = null;
-          onTypeBlur();
+          tryValidateAndSave('type');
         }
       "
       density="compact"
@@ -30,9 +30,10 @@
       label="Логин*"
       :model-value="local.login"
       @update:modelValue="local.login = $event"
-      @blur="onLoginBlur"
-      :error="!validLogin"
+      @blur="() => tryValidateAndSave('login')"
+      :error="touched.login && !validLogin"
       maxlength="100"
+      required
     />
 
     <FormField
@@ -41,9 +42,10 @@
       type="password"
       :model-value="local.password || ''"
       @update:modelValue="local.password = $event"
-      @blur="onPasswordBlur"
-      :error="!validPassword"
+      @blur="() => tryValidateAndSave('password')"
+      :error="touched.password && !validPassword"
       maxlength="100"
+      required
     />
 
     <v-btn icon="mdi-delete" color="error" variant="text" @click="$emit('remove', local.id)" />
@@ -73,32 +75,49 @@ const validLabels = ref(true);
 const validLogin = ref(true);
 const validPassword = ref(true);
 
+const touched = ref({
+  labels: false,
+  login: false,
+  password: false,
+});
+
 function onLabelsBlur() {
+  touched.value.labels = true;
   validLabels.value = validateLabels(labelsInput.value);
   local.value.labels = labelsInput.value
     .split(';')
     .map((t) => ({ text: t.trim() }))
     .filter((t) => t.text);
-  emitUpdate();
+
+  if (validLabels.value) {
+    emit('update', { ...local.value });
+  }
 }
 
-function onLoginBlur() {
+function areRequiredFieldsFilled(): boolean {
+  if (!local.value.type) return false;
+  if (!local.value.login) return false;
+  return !(local.value.type === 'Локальная' && !local.value.password);
+}
+
+function tryValidateAndSave(field?: 'login' | 'password' | 'type') {
+  if (field) touched.value[field] = true;
+
+  validLogin.value = true;
+  validPassword.value = true;
+  validLabels.value = validateLabels(labelsInput.value);
+
+  if (!areRequiredFieldsFilled()) {
+    validLogin.value = !touched.value.login || !!local.value.login;
+    validPassword.value =
+      local.value.type !== 'Локальная' || !touched.value.password || !!local.value.password;
+    return;
+  }
+
   validLogin.value = validateLogin(local.value.login);
-  emitUpdate();
-}
-
-function onPasswordBlur() {
   validPassword.value = validatePassword(local.value.password, local.value.type);
-  emitUpdate();
-}
 
-function onTypeBlur() {
-  validPassword.value = validatePassword(local.value.password, local.value.type);
-  emitUpdate();
-}
-
-function emitUpdate() {
-  if (validLabels.value && validLogin.value && validPassword.value) {
+  if (validLogin.value && validPassword.value) {
     emit('update', { ...local.value });
   }
 }
@@ -108,6 +127,10 @@ watch(
   (val) => {
     local.value = { ...val };
     labelsInput.value = val.labels.map((l) => l.text).join('; ');
+    validLabels.value = true;
+    validLogin.value = true;
+    validPassword.value = true;
+    touched.value = { labels: false, login: false, password: false };
   },
   { deep: true },
 );
