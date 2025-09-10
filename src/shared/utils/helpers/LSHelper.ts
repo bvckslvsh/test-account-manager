@@ -1,14 +1,13 @@
-export default class LSController {
-    static put(object: Record<string, string>) {
+export default class LSHelper {
+    static put(object: Record<string, unknown>) {
         for (let [key, val] of Object.entries(object)) {
             localStorage.setItem(key, JSON.stringify(val));
         }
     }
 
-    static get(name: string) {
+    static get<T>(name: string): T | null {
         const item = localStorage.getItem(name);
-
-        return item ? JSON.parse(item) : null;
+        return item ? JSON.parse(item) as T : null;
     }
 
     static remove(name: string) {
