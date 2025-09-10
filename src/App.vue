@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AccountsPage from "./pages/AccountsPage.vue";
-import {useAccountsStore} from "./shared/entities/account/model/store.ts";
+import AccountsPage from './pages/AccountsPage.vue';
+import { useAccountsStore } from './features/accounts/store/store.ts';
 import { storeToRefs } from 'pinia';
 
 const accountsStore = useAccountsStore();

@@ -5,38 +5,36 @@
       <v-btn icon="mdi-plus" color="primary" @click="add" />
     </div>
 
-    <p class="accounts-form__hint">
-      Для указания нескольких меток используйте разделитель ;
-    </p>
+    <p class="accounts-form__hint">Для указания нескольких меток используйте разделитель ;</p>
 
     <AccountItem
-        v-for="acc in accounts"
-        :key="acc.id"
-        :account="acc"
-        @update="update"
-        @remove="remove"
+      v-for="acc in accounts"
+      :key="acc.id"
+      :account="acc"
+      @update="update"
+      @remove="remove"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import {useAccountsStore} from "../../../shared/entities/account/model/store.ts";
-import AccountItem from "../../../shared/entities/account/ui/AccountItem.vue";
+import { storeToRefs } from 'pinia';
+import { useAccountsStore } from '@/features/accounts/store/store.js';
+import AccountItem from '@/shared/entities/account/ui/AccountItem.vue';
 
-const store = useAccountsStore()
-const { accounts } = storeToRefs(store)
+const store = useAccountsStore();
+const { accounts } = storeToRefs(store);
 
 function add() {
-  store.addAccount()
+  store.addAccount();
 }
 
 function update(acc: any) {
-  store.updateAccount(acc)
+  store.updateAccount(acc);
 }
 
 function remove(id: string) {
-  store.removeAccount(id)
+  store.removeAccount(id);
 }
 </script>
 

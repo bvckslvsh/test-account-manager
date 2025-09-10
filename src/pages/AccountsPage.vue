@@ -5,5 +5,5 @@
 </template>
 
 <script setup lang="ts">
-import AccountsForm from "../features/accounts/ui/AccountsForm.vue";
+import AccountsForm from '@/features/accounts/ui/AccountsForm.vue';
 </script>
